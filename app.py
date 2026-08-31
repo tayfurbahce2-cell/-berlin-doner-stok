@@ -101,40 +101,52 @@ def import_existing(db):
     db.commit(); return True
 
 st.set_page_config(page_title="Berlin Döner Stok",page_icon="🥙",layout="wide")
-
-# Telefonda ana ekrana eklendiğinde uygulama gibi açılması için PWA/iPhone metadata.
 components.html("""
 <script>
 (function(){
-  const d = window.parent.document;
-  const head = d.head;
-  function meta(name, content){
-    let m = head.querySelector('meta[name="'+name+'"]');
-    if(!m){ m=d.createElement('meta'); m.name=name; head.appendChild(m); }
-    m.content=content;
-  }
-  meta('apple-mobile-web-app-capable','yes');
-  meta('apple-mobile-web-app-status-bar-style','black-translucent');
-  meta('apple-mobile-web-app-title','Döner Stok');
-  meta('mobile-web-app-capable','yes');
-  meta('theme-color','#111111');
-  let manifest=head.querySelector('link[rel="manifest"]');
-  if(!manifest){ manifest=d.createElement('link'); manifest.rel='manifest'; head.appendChild(manifest); }
-  manifest.href='/app/static/manifest.json';
+  const d = window.parent.document; const head = d.head;
+  function meta(name, content){ let m=head.querySelector('meta[name="'+name+'"]'); if(!m){m=d.createElement('meta');m.name=name;head.appendChild(m);} m.content=content; }
+  meta('apple-mobile-web-app-capable','yes'); meta('apple-mobile-web-app-status-bar-style','black-translucent');
+  meta('apple-mobile-web-app-title','Döner Stok'); meta('mobile-web-app-capable','yes'); meta('theme-color','#111111');
+  let manifest=head.querySelector('link[rel="manifest"]'); if(!manifest){manifest=d.createElement('link');manifest.rel='manifest';head.appendChild(manifest);} manifest.href='/app/static/manifest.json';
   d.title='Berlin Döner Stok';
 })();
 </script>
 """, height=0)
 
 db=con(); st.title("🥙 Berlin Döner – Stok Programı")
-st.caption("📱 Telefonunda Safari/Chrome → Paylaş → Ana Ekrana Ekle. Sonra normal uygulama gibi açılır.")
-tabs=st.tabs(["📊 Özet","⬇️ Eski Verileri Aktar","📄 Fatura Yükle","🧾 Satış Gir","📅 Eksik Haftalar","🗃️ Veriler"])
+st.caption("📱 Safari/Chrome → Paylaş → Ana Ekrana Ekle")
+tabs=st.tabs(["📊 Ana Sayfa","⬇️ Eski Verileri Aktar","📄 Fatura Yükle","🧾 Satış Gir","📅 Eksik Haftalar","🗃️ Veriler"])
 
 with tabs[0]:
-    p=pd.read_sql_query("SELECT product,SUM(qty) Alınan FROM purchases GROUP BY product",db); s=pd.read_sql_query("SELECT product,SUM(qty) Satılan FROM sales GROUP BY product",db)
-    if p.empty and s.empty: st.info("Henüz veri yok. 'Eski Verileri Aktar' bölümüne gir.")
+    p=pd.read_sql_query("SELECT product, SUM(qty) AS qty, MAX(unit) AS unit FROM purchases GROUP BY product ORDER BY product",db)
+    s=pd.read_sql_query("SELECT product, SUM(qty) AS qty FROM sales GROUP BY product ORDER BY product",db)
+    if p.empty and s.empty:
+        st.info("Henüz veri yok. 'Eski Verileri Aktar' bölümüne gir.")
     else:
-        d=pd.merge(p,s,on="product",how="outer").fillna(0); d["Fark"]=d["Alınan"]-d["Satılan"]; d=d.rename(columns={"product":"Ürün"})
+        st.subheader("📦 Toplam Alınan Malzemeler")
+        if p.empty:
+            st.write("Henüz alış kaydı yok.")
+        else:
+            for _,r in p.iterrows():
+                q=int(r['qty']) if float(r['qty']).is_integer() else round(float(r['qty']),2)
+                st.write(f"**{r['product']}** — {q} {r['unit'] or ''}")
+
+        st.divider()
+        st.subheader("🧾 Toplam Satılanlar")
+        if s.empty:
+            st.write("Henüz satış kaydı yok.")
+        else:
+            for _,r in s.iterrows():
+                q=int(r['qty']) if float(r['qty']).is_integer() else round(float(r['qty']),2)
+                st.write(f"**{r['product']}** — {q} adet")
+
+        st.divider()
+        st.subheader("⚖️ Alınan / Satılan / Fark")
+        pp=p[['product','qty']].rename(columns={'qty':'Alınan'}) if not p.empty else pd.DataFrame(columns=['product','Alınan'])
+        ss=s[['product','qty']].rename(columns={'qty':'Satılan'}) if not s.empty else pd.DataFrame(columns=['product','Satılan'])
+        d=pd.merge(pp,ss,on='product',how='outer').fillna(0)
+        d['Fark']=d['Alınan']-d['Satılan']; d=d.rename(columns={'product':'Ürün'})
         st.dataframe(d,use_container_width=True,hide_index=True)
         st.caption("Fark + ise alış satıştan fazla; - ise POS satışı bilinen alıştan fazla.")
 
@@ -144,7 +156,7 @@ with tabs[1]:
     done=db.execute("SELECT value FROM settings WHERE key='existing_import_v1'").fetchone()
     if done: st.success("Eski veriler zaten aktarıldı. İkinci kez eklenmez.")
     elif st.button("✅ Eski verilerimi şimdi aktar",type="primary",use_container_width=True):
-        if import_existing(db): st.success("Tamamlandı. Özet ve Eksik Haftalar sekmelerine bakabilirsin."); st.rerun()
+        if import_existing(db): st.success("Tamamlandı."); st.rerun()
 
 with tabs[2]:
     f=st.file_uploader("PDF fatura seç",type=["pdf"])
