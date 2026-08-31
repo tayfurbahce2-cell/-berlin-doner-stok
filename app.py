@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import sqlite3, re, io
 from datetime import date, datetime, timedelta
 import pandas as pd
@@ -68,7 +69,6 @@ def parse_lines(t):
 def import_existing(db):
     done=db.execute("SELECT value FROM settings WHERE key='existing_import_v1'").fetchone()
     if done: return False
-    # Daha önce bu sohbet içinde hesaplanan ve kontrol edilen toplam alışlar.
     purchases={
       "Cola 0,33 (Cola+Zero)":1944,"Fanta 0,33 (tüm çeşitler)":1392,"Mezzo Mix 0,33":288,
       "Uludağ 0,33":792,"Su 0,50":840,"Ayran":1320,"Capri-Sun":590,"Cola 1L":312,
@@ -82,13 +82,11 @@ def import_existing(db):
         if product in ["Mayonez","Gold Ketchup","Curry Ketchup","Kırmızı Soğan","Beyaz Lahana","Domates","Beyaz Peynir","Chicken Nuggets"]: unit="kg"
         if product=="Kızartma Yağı": unit="L"
         db.execute("INSERT INTO purchases(invoice_no,product,qty,unit) VALUES(?,?,?,?)",("IMPORT-TOPLAM",product,qty,unit))
-    # POS'ta görülen 6 içecek raporunun toplamları.
     sales={"Cola 0,33 (Cola+Zero)":2710,"Fanta 0,33 (tüm çeşitler)":1278,"Mezzo Mix 0,33":351,
            "Uludağ 0,33":1002,"Su 0,50":371,"Ayran":1647,"Capri-Sun":487,"Cola 1L":154,
            "Mezzo Mix 1L":22,"Uludağ 1L":15}
     for product,qty in sales.items():
         db.execute("INSERT INTO sales(sale_date,product,qty) VALUES(?,?,?)",("2026-08-31",product,qty))
-    # Yüklenen 21 Botan faturanın haftaları + ayrıca Malis Uludağ faturası.
     invoice_dates=[
       ("RE26001344","2026-01-07","Botan"),("RE26003022","2026-01-14","Botan"),("RE26006619","2026-01-28","Botan"),
       ("RE26008549","2026-02-04","Botan"),("RE26010481","2026-02-11","Botan"),("RE26012402","2026-02-18","Botan"),("RE26014193","2026-02-25","Botan"),
@@ -103,7 +101,33 @@ def import_existing(db):
     db.commit(); return True
 
 st.set_page_config(page_title="Berlin Döner Stok",page_icon="🥙",layout="wide")
+
+# Telefonda ana ekrana eklendiğinde uygulama gibi açılması için PWA/iPhone metadata.
+components.html("""
+<script>
+(function(){
+  const d = window.parent.document;
+  const head = d.head;
+  function meta(name, content){
+    let m = head.querySelector('meta[name="'+name+'"]');
+    if(!m){ m=d.createElement('meta'); m.name=name; head.appendChild(m); }
+    m.content=content;
+  }
+  meta('apple-mobile-web-app-capable','yes');
+  meta('apple-mobile-web-app-status-bar-style','black-translucent');
+  meta('apple-mobile-web-app-title','Döner Stok');
+  meta('mobile-web-app-capable','yes');
+  meta('theme-color','#111111');
+  let manifest=head.querySelector('link[rel="manifest"]');
+  if(!manifest){ manifest=d.createElement('link'); manifest.rel='manifest'; head.appendChild(manifest); }
+  manifest.href='/app/static/manifest.json';
+  d.title='Berlin Döner Stok';
+})();
+</script>
+""", height=0)
+
 db=con(); st.title("🥙 Berlin Döner – Stok Programı")
+st.caption("📱 Telefonunda Safari/Chrome → Paylaş → Ana Ekrana Ekle. Sonra normal uygulama gibi açılır.")
 tabs=st.tabs(["📊 Özet","⬇️ Eski Verileri Aktar","📄 Fatura Yükle","🧾 Satış Gir","📅 Eksik Haftalar","🗃️ Veriler"])
 
 with tabs[0]:
