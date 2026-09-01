@@ -73,47 +73,50 @@ def import_existing(db):
     for no,dt,sup in invoice_dates: db.execute('INSERT OR IGNORE INTO invoices(invoice_no,invoice_date,supplier,file_name) VALUES(?,?,?,?)',(no,dt,sup,'Sohbetten aktarıldı'))
     db.execute("INSERT INTO settings(key,value) VALUES('existing_import_v1','1')"); db.commit(); return True
 
+def import_new_invoices_v2(db):
+    rows={
+      'RE26004854':('2026-01-21',[('Mayonez',100,'kg'),('Gold Ketchup',40,'kg'),('Curry Ketchup',10,'kg'),('Kızartma Yağı',45,'L'),('Beyaz Peynir',16,'kg'),('Chicken Nuggets',3,'kg'),('Currywurst',20,'adet'),('Best Burger',80,'adet'),('Chili',1,'kg'),('Sarımsak Granül',2,'kg'),('Paprika',1.6,'kg'),('Dill',1,'kg'),('Pommes Tuzu',2,'kg'),('Cola 0,33 (Cola+Zero)',120,'adet'),('Uludağ 0,33',24,'adet'),('Fanta 0,33 (tüm çeşitler)',72,'adet'),('Ayran',60,'adet'),('Capri-Sun',80,'adet'),('Kırmızı Soğan',10,'kg'),('Domates',18,'kg')]),
+      'RE26018328':('2026-03-11',[('Mayonez',80,'kg'),('Gold Ketchup',30,'kg'),('Curry Ketchup',10,'kg'),('Kızartma Yağı',30,'L'),('Beyaz Peynir',16,'kg'),('Best Burger',80,'adet'),('Chicken Nuggets',4,'kg'),('Currywurst',20,'adet'),('Dill',1,'kg'),('Chili',2,'kg'),('Paprika',2,'kg'),('Sarımsak Granül',1,'kg'),('Lolipop',100,'adet'),('Cola 1L',12,'adet'),('Cola 0,33 (Cola+Zero)',96,'adet'),('Fanta 0,33 (tüm çeşitler)',72,'adet'),('Mezzo Mix 0,33',24,'adet'),('Su 0,50',72,'adet'),('Ayran',60,'adet'),('Hamburger Box Küçük',100,'adet'),('Beyaz Lahana',15,'kg'),('Porsiyon Ketchup',100,'adet'),('Porsiyon Mayonez',100,'adet'),('Burger Dressing',1,'adet'),('Snack Ketchup',1,'adet')]),
+      'RE26032904':('2026-04-29',[('Mayonez',80,'kg'),('Gold Ketchup',30,'kg'),('Curry Ketchup',20,'kg'),('Kızartma Yağı',30,'L'),('Best Burger',80,'adet'),('Chicken Nuggets',2,'kg'),('Dill',1,'kg'),('Chili',2,'kg'),('Sarımsak Granül',1,'kg'),('Paprika',0.8,'kg'),('Porsiyon Kabı',250,'adet'),('Porsiyon Mayonez',100,'adet'),('Cola 1L',24,'adet'),('Fanta 1L',12,'adet'),('Snack Box',125,'adet'),('Cola 0,33 (Cola+Zero)',72,'adet'),('Fanta 0,33 (tüm çeşitler)',72,'adet'),('Uludağ 0,33',48,'adet'),('Ayran',40,'adet'),('Capri-Sun',40,'adet'),('Su 0,50',48,'adet'),('Lolipop',100,'adet'),('Snack Ketchup',1,'adet'),('Burger Dressing',2,'adet')]),
+      'RE26035275':('2026-05-06',[('Mayonez',80,'kg'),('Curry Ketchup',20,'kg'),('Gold Ketchup',20,'kg'),('Beyaz Peynir',16,'kg'),('Kızartma Yağı',30,'L'),('Snack Ketchup',1,'adet'),('Burger Dressing',1,'adet'),('Üçgen Yufka',400,'adet'),('Chicken Nuggets',3,'kg'),('Best Burger',80,'adet'),('Currywurst',10,'adet'),('Paprika',0.8,'kg'),('Sarımsak Granül',1,'kg'),('Chili',2,'kg'),('Pommes Tuzu',2,'kg'),('Dill',1,'kg'),('Cola 0,33 (Cola+Zero)',72,'adet'),('Uludağ 0,33',48,'adet'),('Fanta 0,33 (tüm çeşitler)',72,'adet'),('Mezzo Mix 0,33',24,'adet'),('Su 0,50',48,'adet'),('Kırmızı Soğan',10,'kg'),('Ayran',40,'adet'),('Capri-Sun',40,'adet'),('Beyaz Lahana',15,'kg')]),
+      'RE26037598':('2026-05-13',[('Mayonez',90,'kg'),('Gold Ketchup',40,'kg'),('Curry Ketchup',10,'kg'),('Kızartma Yağı',30,'L'),('Snack Ketchup',1,'adet'),('Burger Dressing',1,'adet'),('Best Burger',80,'adet'),('Chicken Nuggets',3,'kg'),('Currywurst',10,'adet'),('Sarımsak Granül',1,'kg'),('Paprika',0.8,'kg'),('Chili',2,'kg'),('Kağıt Havlu',5000,'adet'),('Cola 1L',12,'adet'),('Mezzo Mix 1L',12,'adet'),('Fanta 1L',12,'adet'),('Cola 0,33 (Cola+Zero)',120,'adet'),('Fanta 0,33 (tüm çeşitler)',24,'adet'),('Uludağ 0,33',24,'adet'),('Mezzo Mix 0,33',24,'adet'),('Su 0,50',48,'adet'),('Capri-Sun',40,'adet'),('Beyaz Lahana',15,'kg'),('Ayran',60,'adet')]),
+      'RE26039743':('2026-05-20',[('Mayonez',80,'kg'),('Gold Ketchup',40,'kg'),('Curry Ketchup',20,'kg'),('Kızartma Yağı',30,'L'),('Beyaz Peynir',16,'kg'),('Burger Dressing',2,'adet'),('Snack Ketchup',2,'adet'),('Best Burger',80,'adet'),('Chicken Nuggets',2,'kg'),('Currywurst',20,'adet'),('Chili',2,'kg'),('Sarımsak Granül',2,'kg'),('Paprika',0.8,'kg'),('Dill',1,'kg'),('Bardak 0,2L',100,'adet'),('Hamburger Box Maxi',125,'adet'),('Porsiyon Mayonez',100,'adet'),('Cola 1L',12,'adet'),('Sprite 1L',12,'adet'),('Cola 0,33 (Cola+Zero)',72,'adet'),('Uludağ 0,33',24,'adet'),('Mezzo Mix 0,33',24,'adet'),('Fanta 0,33 (tüm çeşitler)',48,'adet'),('Ayran',60,'adet'),('Su 0,50',48,'adet'),('Capri-Sun',80,'adet'),('Beyaz Lahana',15,'kg'),('Lolipop',100,'adet')]),
+      'RE26042012':('2026-05-27',[('Mayonez',100,'kg'),('Gold Ketchup',30,'kg'),('Curry Ketchup',10,'kg'),('Kızartma Yağı',15,'L'),('Burger Dressing',2,'adet'),('Snack Ketchup',1,'adet'),('Porsiyon Ketchup',100,'adet'),('Chicken Nuggets',2,'kg'),('Currywurst',10,'adet'),('Best Burger',80,'adet'),('Paprika',1.6,'kg'),('Sarımsak Granül',1,'kg'),('Chili',2,'kg'),('Pommes Tuzu',2,'kg'),('Hamburger Box Küçük',100,'adet'),('Hamburger Box Maxi',125,'adet'),('Snack Box',125,'adet'),('Salata Kabı',100,'adet'),('Cola 1L',12,'adet'),('Cola 0,33 (Cola+Zero)',96,'adet'),('Uludağ 0,33',48,'adet'),('Fanta 0,33 (tüm çeşitler)',48,'adet'),('Su 0,50',48,'adet'),('Ayran',40,'adet'),('Capri-Sun',80,'adet')]),
+      'RE26044428':('2026-06-03',[('Mayonez',80,'kg'),('Gold Ketchup',30,'kg'),('Curry Ketchup',20,'kg'),('Kızartma Yağı',30,'L'),('Beyaz Peynir',16,'kg'),('Chicken Nuggets',4,'kg'),('Best Burger',80,'adet'),('Snack Ketchup',1,'adet'),('Burger Dressing',1,'adet'),('Dill',1,'kg'),('Sarımsak Granül',1,'kg'),('Chili',2,'kg'),('Porsiyon Kabı',500,'adet'),('Cola 1L',12,'adet'),('Mezzo Mix 1L',12,'adet'),('Cola 0,33 (Cola+Zero)',120,'adet'),('Fanta 0,33 (tüm çeşitler)',48,'adet'),('Uludağ 0,33',24,'adet'),('Mezzo Mix 0,33',24,'adet'),('Su 0,50',24,'adet'),('Ayran',60,'adet'),('Capri-Sun',40,'adet'),('Beyaz Lahana',15,'kg'),('Paprika',0.8,'kg'),('Taze Patates',30,'kg')]),
+      'RE26046623':('2026-06-10',[('Mayonez',70,'kg'),('Gold Ketchup',40,'kg'),('Curry Ketchup',20,'kg'),('Kızartma Yağı',15,'L'),('Üçgen Yufka',400,'adet'),('Snack Ketchup',1,'adet'),('Burger Dressing',1,'adet'),('Chicken Nuggets',3,'kg'),('Currywurst',20,'adet'),('Çatal',1000,'adet'),('Paprika',0.8,'kg'),('Sarımsak Granül',1,'kg'),('Chili',1,'kg'),('Porsiyon Mayonez',100,'adet'),('Porsiyon Ketchup',100,'adet'),('Cola 1L',12,'adet'),('Sprite 1L',12,'adet'),('Cola 0,33 (Cola+Zero)',96,'adet'),('Fanta 0,33 (tüm çeşitler)',96,'adet'),('Uludağ 0,33',24,'adet'),('Su 0,50',48,'adet'),('Ayran',60,'adet'),('Capri-Sun',40,'adet'),('Beyaz Lahana',15,'kg'),('Hamburger Box Küçük',100,'adet')]),
+      'RE26048801':('2026-06-17',[('Mayonez',60,'kg'),('Pommes Tuzu',2,'kg'),('Capri-Sun',40,'adet'),('Beyaz Lahana',15,'kg'),('Cola 1L',12,'adet'),('Su 0,50',48,'adet'),('Ayran',40,'adet'),('Fanta 0,33 (tüm çeşitler)',120,'adet'),('Cola 0,33 (Cola+Zero)',96,'adet'),('Mezzo Mix 0,33',24,'adet'),('Gold Ketchup',30,'kg'),('Dill',1,'kg'),('Sprite 1L',12,'adet'),('Paprika',0.8,'kg'),('Sarımsak Granül',1,'kg'),('Chili',2,'kg'),('Beyaz Peynir',16,'kg'),('Currywurst',10,'adet'),('Chicken Nuggets',3,'kg'),('Best Burger',80,'adet'),('Curry Ketchup',10,'kg'),('Burger Dressing',1,'adet'),('Kızartma Yağı',30,'L'),('Snack Ketchup',2,'adet')]),
+      'RE26056188':('2026-07-08',[('Curry Ketchup',20,'kg'),('Paprika',0.8,'kg'),('Mezzo Mix 0,33',24,'adet'),('Hamburger Box Küçük',100,'adet'),('Hamburger Box Maxi',125,'adet'),('Snack Box',125,'adet'),('Ayran',60,'adet'),('Capri-Sun',40,'adet'),('Su 0,50',72,'adet'),('Fanta 0,33 (tüm çeşitler)',120,'adet'),('Cola 0,33 (Cola+Zero)',120,'adet'),('Uludağ 0,33',48,'adet'),('Gold Ketchup',30,'kg'),('Sarımsak Granül',1,'kg'),('Cola 1L',24,'adet'),('Best Burger',80,'adet'),('Pommes Tuzu',2,'kg'),('Chili',1,'kg'),('Currywurst',10,'adet'),('Mayonez',80,'kg'),('Kızartma Yağı',15,'L'),('Beyaz Peynir',16,'kg'),('Chicken Nuggets',5,'kg'),('Porsiyon Mayonez',100,'adet'),('Burger Dressing',1,'adet'),('Porsiyon Ketchup',100,'adet'),('Snack Ketchup',2,'adet'),('Lolipop',100,'adet')])
+    }
+    added=0
+    for no,(dt,items) in rows.items():
+        if db.execute('SELECT 1 FROM invoices WHERE invoice_no=?',(no,)).fetchone(): continue
+        db.execute('INSERT INTO invoices(invoice_no,invoice_date,supplier,file_name) VALUES(?,?,?,?)',(no,dt,'Botan','Sohbetten yeni fatura'))
+        for product,qty,unit in items: db.execute('INSERT INTO purchases(invoice_no,product,qty,unit) VALUES(?,?,?,?)',(no,product,qty,unit))
+        added+=1
+    db.execute("INSERT OR REPLACE INTO settings(key,value) VALUES('new_invoices_v2','1')"); db.commit(); return added
+
 st.set_page_config(page_title='Berlin Döner Stok',page_icon='🥙',layout='centered',initial_sidebar_state='collapsed')
-
-st.markdown('''<style>
-#MainMenu, footer, header {visibility:hidden}.block-container{padding:1rem 1rem 6.5rem;max-width:520px}.stApp{background:#070707;color:#fff}
-:root{--red:#ef1b14;--panel:#141414;--border:#292929;--muted:#8f8f8f}
-.brand{display:flex;align-items:center;gap:12px;margin:6px 0 18px}.brand-logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#ef1b14,#8f0905);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 10px 28px rgba(239,27,20,.28)}.brand-title{font-size:22px;font-weight:900}.brand-sub{font-size:12px;color:var(--muted)}
-.hero{background:radial-gradient(circle at 85% 20%,rgba(239,27,20,.22),transparent 38%),linear-gradient(145deg,#1b1b1b,#0d0d0d);border:1px solid #303030;border-radius:24px;padding:20px;margin-bottom:15px;box-shadow:0 18px 40px rgba(0,0,0,.35)}.hero-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:#ff4a43}.hero h2{font-size:27px;margin:7px 0 4px}.hero p{color:#aaa;margin:0;font-size:13px}
-.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0 18px}.metric-card{background:#121212;border:1px solid var(--border);border-radius:18px;padding:13px 10px}.metric-label{font-size:10px;color:#929292}.metric-value{font-size:22px;font-weight:900;margin-top:4px}.metric-value.red{color:#ff3b34}
-.section-title{font-size:16px;font-weight:850;margin:20px 0 9px}.stock-card{display:flex;justify-content:space-between;align-items:center;background:#121212;border:1px solid #282828;border-radius:18px;padding:13px 14px;margin:8px 0}.stock-left{font-size:14px;font-weight:700}.stock-right{text-align:right;font-size:18px;font-weight:900}.stock-unit{font-size:10px;color:#8a8a8a;font-weight:600}.pill{display:inline-block;font-size:10px;padding:4px 7px;border-radius:999px;background:#28100f;color:#ff625c;border:1px solid #4a1715;margin-top:4px}
-.stButton>button{width:100%;border-radius:15px;min-height:46px;background:#171717;color:#fff;border:1px solid #333;font-weight:800}.stButton>button[kind='primary']{background:linear-gradient(135deg,#ef1b14,#b50c07);border:0;box-shadow:0 8px 20px rgba(239,27,20,.2)}
-.stTextInput input,.stNumberInput input,.stDateInput input{background:#101010!important;color:#fff!important;border:1px solid #333!important;border-radius:14px!important}.stFileUploader{background:#111;border:1px solid #292929;border-radius:18px;padding:8px}
-[data-testid='stDataFrame']{border:1px solid #292929;border-radius:18px;overflow:hidden}.stAlert{border-radius:16px}
-div[role='radiogroup']{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(17,17,17,.96);backdrop-filter:blur(18px);border:1px solid #303030;border-radius:22px;padding:7px 9px;width:min(94vw,500px);display:flex!important;justify-content:space-between;box-shadow:0 14px 40px rgba(0,0,0,.5)}div[role='radiogroup'] label{padding:7px 5px!important;border-radius:14px;flex:1;justify-content:center}div[role='radiogroup'] label:has(input:checked){background:#26100f}div[role='radiogroup'] p{font-size:11px!important;white-space:nowrap}div[role='radiogroup'] [data-testid='stMarkdownContainer']{text-align:center}div[role='radiogroup'] div[data-testid='stWidgetLabel']{display:none}
-@media(max-width:420px){.block-container{padding-left:.75rem;padding-right:.75rem}.metric-value{font-size:19px}.brand-title{font-size:20px}}
-</style>''',unsafe_allow_html=True)
-
+st.markdown('''<style>#MainMenu,footer,header{visibility:hidden}.block-container{padding:1rem 1rem 6.5rem;max-width:520px}.stApp{background:#070707;color:#fff}:root{--red:#ef1b14;--muted:#8f8f8f}.brand{display:flex;align-items:center;gap:12px;margin:6px 0 18px}.brand-logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#ef1b14,#8f0905);display:flex;align-items:center;justify-content:center;font-size:26px}.brand-title{font-size:22px;font-weight:900}.brand-sub{font-size:12px;color:var(--muted)}.hero{background:radial-gradient(circle at 85% 20%,rgba(239,27,20,.22),transparent 38%),linear-gradient(145deg,#1b1b1b,#0d0d0d);border:1px solid #303030;border-radius:24px;padding:20px;margin-bottom:15px}.hero-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:#ff4a43}.hero h2{font-size:27px;margin:7px 0 4px}.hero p{color:#aaa;margin:0;font-size:13px}.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0 18px}.metric-card{background:#121212;border:1px solid #292929;border-radius:18px;padding:13px 10px}.metric-label{font-size:10px;color:#929292}.metric-value{font-size:22px;font-weight:900;margin-top:4px}.metric-value.red{color:#ff3b34}.section-title{font-size:16px;font-weight:850;margin:20px 0 9px}.stock-card{display:flex;justify-content:space-between;align-items:center;background:#121212;border:1px solid #282828;border-radius:18px;padding:13px 14px;margin:8px 0}.stock-left{font-size:14px;font-weight:700}.stock-right{text-align:right;font-size:18px;font-weight:900}.stock-unit{font-size:10px;color:#8a8a8a;font-weight:600}.stButton>button{width:100%;border-radius:15px;min-height:46px;background:#171717;color:#fff;border:1px solid #333;font-weight:800}.stButton>button[kind=primary]{background:linear-gradient(135deg,#ef1b14,#b50c07);border:0}.stTextInput input,.stNumberInput input,.stDateInput input{background:#101010!important;color:#fff!important;border:1px solid #333!important;border-radius:14px!important}[data-testid=stDataFrame]{border:1px solid #292929;border-radius:18px;overflow:hidden}div[role=radiogroup]{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(17,17,17,.96);border:1px solid #303030;border-radius:22px;padding:7px 9px;width:min(94vw,500px);display:flex!important;justify-content:space-between}div[role=radiogroup] label{padding:7px 5px!important;border-radius:14px;flex:1;justify-content:center}div[role=radiogroup] label:has(input:checked){background:#26100f}div[role=radiogroup] p{font-size:11px!important;white-space:nowrap}</style>''',unsafe_allow_html=True)
 components.html("""<script>(function(){const d=window.parent.document,h=d.head;function m(n,c){let x=h.querySelector('meta[name="'+n+'"]');if(!x){x=d.createElement('meta');x.name=n;h.appendChild(x)}x.content=c}m('apple-mobile-web-app-capable','yes');m('apple-mobile-web-app-status-bar-style','black-translucent');m('apple-mobile-web-app-title','Döner Stok');m('theme-color','#070707');d.title='Berlin Döner Stok';})();</script>""",height=0)
-
 try: APP_PIN=str(st.secrets['APP_PIN'])
-except Exception:
-    st.error('🔒 PIN ayarı eksik. Streamlit Secrets içine APP_PIN ekle.'); st.stop()
+except Exception: st.error('🔒 PIN ayarı eksik. Streamlit Secrets içine APP_PIN ekle.'); st.stop()
 if 'pin_ok' not in st.session_state: st.session_state.pin_ok=False
 if not st.session_state.pin_ok:
-    st.markdown("<div style='height:8vh'></div><div style='display:flex;justify-content:center'><div class='brand-logo' style='width:84px;height:84px;font-size:44px;border-radius:26px'>🥙</div></div><div style='text-align:center;font-size:30px;font-weight:950;margin-top:16px'>BERLIN <span style='color:#ef1b14'>DÖNER</span></div><div style='text-align:center;color:#888;font-size:12px;letter-spacing:.22em;margin:4px 0 25px'>STOK TAKİP</div>",unsafe_allow_html=True)
+    st.markdown("<div style='height:8vh'></div><div style='text-align:center;font-size:72px'>🥙</div><div style='text-align:center;font-size:30px;font-weight:900'>BERLIN <span style='color:#ef1b14'>DÖNER</span></div><div style='text-align:center;color:#888;font-size:12px;letter-spacing:.22em;margin:4px 0 25px'>STOK TAKİP</div>",unsafe_allow_html=True)
     pin=st.text_input('PIN',type='password',max_chars=4,placeholder='••••',label_visibility='collapsed')
     if st.button('Giriş Yap',type='primary'):
         if hmac.compare_digest(pin,APP_PIN): st.session_state.pin_ok=True; st.rerun()
         else: st.error('PIN yanlış.')
     st.stop()
 
-db=con()
+db=con(); import_new_invoices_v2(db)
 p=pd.read_sql_query('SELECT product,SUM(qty) qty,MAX(unit) unit FROM purchases GROUP BY product ORDER BY product',db)
 s=pd.read_sql_query('SELECT product,SUM(qty) qty FROM sales GROUP BY product ORDER BY product',db)
-
 h1,h2=st.columns([5,1])
 with h1: st.markdown("<div class='brand'><div class='brand-logo'>🥙</div><div><div class='brand-title'>Berlin Döner</div><div class='brand-sub'>Stok Takip • Yönetim Paneli</div></div></div>",unsafe_allow_html=True)
 with h2:
     if st.button('⏻',help='Çıkış'): st.session_state.pin_ok=False; st.rerun()
-
 nav=st.radio('Menü',['🏠 Ana','📄 Fatura','🧾 Satış','📅 Haftalar','🗃️ Veriler','⚙️ Aktar'],horizontal=True,label_visibility='collapsed')
-
 if nav=='🏠 Ana':
     st.markdown("<div class='hero'><div class='hero-kicker'>CANLI STOK PANELİ</div><h2>Stok sende,<br>kontrol sende.</h2><p>Alış, satış ve farkları tek ekranda gör.</p></div>",unsafe_allow_html=True)
     buy=float(p.qty.sum()) if not p.empty else 0; sell=float(s.qty.sum()) if not s.empty else 0
@@ -123,64 +126,48 @@ if nav=='🏠 Ana':
     else:
         for _,r in p.iterrows():
             q=int(r.qty) if float(r.qty).is_integer() else round(float(r.qty),2)
-            st.markdown(f"<div class='stock-card'><div><div class='stock-left'>{r.product}</div><span class='pill'>ALINAN</span></div><div class='stock-right'>{q}<div class='stock-unit'>{r.unit or ''}</div></div></div>",unsafe_allow_html=True)
+            st.markdown(f"<div class='stock-card'><div class='stock-left'>{r['product']}</div><div class='stock-right'>{q}<div class='stock-unit'>{r['unit'] or ''}</div></div></div>",unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🧾 Toplam Satılanlar</div>",unsafe_allow_html=True)
-    if s.empty: st.info('Henüz satış kaydı yok.')
-    else:
+    if not s.empty:
         for _,r in s.iterrows():
             q=int(r.qty) if float(r.qty).is_integer() else round(float(r.qty),2)
-            st.markdown(f"<div class='stock-card'><div><div class='stock-left'>{r.product}</div><span class='pill'>SATILAN</span></div><div class='stock-right'>{q}<div class='stock-unit'>adet</div></div></div>",unsafe_allow_html=True)
-    st.markdown("<div class='section-title'>⚖️ Alınan / Satılan / Fark</div>",unsafe_allow_html=True)
-    pp=p[['product','qty']].rename(columns={'qty':'Alınan'}) if not p.empty else pd.DataFrame(columns=['product','Alınan'])
-    ss=s[['product','qty']].rename(columns={'qty':'Satılan'}) if not s.empty else pd.DataFrame(columns=['product','Satılan'])
+            st.markdown(f"<div class='stock-card'><div class='stock-left'>{r['product']}</div><div class='stock-right'>{q}<div class='stock-unit'>adet</div></div></div>",unsafe_allow_html=True)
+    pp=p[['product','qty']].rename(columns={'qty':'Alınan'}) if not p.empty else pd.DataFrame(columns=['product','Alınan']); ss=s[['product','qty']].rename(columns={'qty':'Satılan'}) if not s.empty else pd.DataFrame(columns=['product','Satılan'])
     d=pd.merge(pp,ss,on='product',how='outer').fillna(0); d['Fark']=d['Alınan']-d['Satılan']; d=d.rename(columns={'product':'Ürün'})
-    st.dataframe(d,use_container_width=True,hide_index=True)
-
+    st.markdown("<div class='section-title'>⚖️ Alınan / Satılan / Fark</div>",unsafe_allow_html=True); st.dataframe(d,use_container_width=True,hide_index=True)
 elif nav=='📄 Fatura':
-    st.markdown("<div class='hero'><div class='hero-kicker'>FATURA</div><h2>Yeni fatura yükle</h2><p>PDF seç, kontrol et ve stoğa kaydet.</p></div>",unsafe_allow_html=True)
-    f=st.file_uploader('PDF fatura seç',type=['pdf'])
+    st.subheader('📄 Fatura Yükle'); f=st.file_uploader('PDF fatura seç',type=['pdf'])
     if f:
-        t=pdf_text(f); inv,dt,sup=meta(t)
-        inv=st.text_input('Rechnung No',inv or ''); dt=st.text_input('Tarih YYYY-MM-DD',dt or ''); sup=st.text_input('Tedarikçi',sup)
+        t=pdf_text(f); inv,dt,sup=meta(t); inv=st.text_input('Rechnung No',inv or ''); dt=st.text_input('Tarih YYYY-MM-DD',dt or ''); sup=st.text_input('Tedarikçi',sup)
         rows=parse_lines(t); df=pd.DataFrame(rows if rows else [{'product':'','qty':0.0,'unit':'adet'}]); df=st.data_editor(df,num_rows='dynamic',use_container_width=True)
-        if st.button('Faturayı Kaydet',type='primary'):
+        if st.button('Faturayı kaydet',type='primary'):
             try:
                 db.execute('INSERT INTO invoices(invoice_no,invoice_date,supplier,file_name) VALUES(?,?,?,?)',(inv,dt,sup,f.name))
                 for _,r in df.iterrows():
                     if str(r['product']).strip() and float(r['qty'])!=0: db.execute('INSERT INTO purchases(invoice_no,product,qty,unit) VALUES(?,?,?,?)',(inv,str(r['product']),float(r['qty']),str(r['unit'])))
-                db.commit(); st.success('Fatura kaydedildi.')
+                db.commit(); st.success('Kaydedildi.'); st.rerun()
             except sqlite3.IntegrityError: st.error('Bu Rechnung zaten kayıtlı; tekrar sayılmadı.')
-
 elif nav=='🧾 Satış':
-    st.markdown("<div class='hero'><div class='hero-kicker'>SATIŞ</div><h2>Satış kaydı ekle</h2><p>POS satışını hızlıca gir.</p></div>",unsafe_allow_html=True)
-    sd=st.date_input('Tarih',date.today()); pr=st.text_input('Ürün'); q=st.number_input('Satılan adet',min_value=0.0,step=1.0)
-    if st.button('Satışı Kaydet',type='primary') and pr and q>0:
-        db.execute('INSERT INTO sales(sale_date,product,qty) VALUES(?,?,?)',(sd.isoformat(),pr,q)); db.commit(); st.success('Satış kaydedildi.')
-
+    st.subheader('🧾 Satış Gir'); sd=st.date_input('Tarih',date.today()); pr=st.text_input('Ürün'); q=st.number_input('Satılan adet',min_value=0.0,step=1.0)
+    if st.button('Satışı kaydet',type='primary') and pr and q>0: db.execute('INSERT INTO sales(sale_date,product,qty) VALUES(?,?,?)',(sd.isoformat(),pr,q)); db.commit(); st.success('Satış kaydedildi.'); st.rerun()
 elif nav=='📅 Haftalar':
-    st.markdown("<div class='hero'><div class='hero-kicker'>FATURA KONTROL</div><h2>Eksik haftalar</h2><p>Botan faturası olmayan haftaları bul.</p></div>",unsafe_allow_html=True)
-    start=st.date_input('Başlangıç',date(2026,1,1)); end=st.date_input('Bitiş',date.today()); invs=pd.read_sql_query("SELECT invoice_date FROM invoices WHERE supplier='Botan'",db); present=set()
+    st.subheader('📅 Eksik Botan Haftaları'); start=st.date_input('Başlangıç',date(2026,1,1),key='a'); end=st.date_input('Bitiş',date.today(),key='b'); invs=pd.read_sql_query("SELECT invoice_date FROM invoices WHERE supplier='Botan'",db); present=set()
     for x in invs.get('invoice_date',[]):
         try:
             dd=datetime.strptime(x,'%Y-%m-%d').date()
             if start<=dd<=end: present.add(monday(dd))
         except: pass
     cur=monday(start); rows=[]
-    while cur<=monday(end):
-        rows.append({'Hafta':f"{cur.strftime('%d.%m.%Y')} – {(cur+timedelta(days=6)).strftime('%d.%m.%Y')}",'Salı':(cur+timedelta(days=1)).strftime('%d.%m.%Y'),'Çarşamba':(cur+timedelta(days=2)).strftime('%d.%m.%Y'),'Durum':'VAR' if cur in present else 'EKSİK'}); cur+=timedelta(days=7)
+    while cur<=monday(end): rows.append({'Hafta':f"{cur.strftime('%d.%m.%Y')} – {(cur+timedelta(days=6)).strftime('%d.%m.%Y')}",'Salı':(cur+timedelta(days=1)).strftime('%d.%m.%Y'),'Çarşamba':(cur+timedelta(days=2)).strftime('%d.%m.%Y'),'Durum':'VAR' if cur in present else 'EKSİK'}); cur+=timedelta(days=7)
     w=pd.DataFrame(rows); only=st.checkbox('Sadece eksikler',True); st.dataframe(w[w.Durum=='EKSİK'] if only else w,use_container_width=True,hide_index=True)
-
 elif nav=='🗃️ Veriler':
-    st.markdown("<div class='hero'><div class='hero-kicker'>KAYITLAR</div><h2>Tüm veriler</h2><p>Fatura, alış ve satış kayıtları.</p></div>",unsafe_allow_html=True)
-    st.markdown('#### Faturalar'); st.dataframe(pd.read_sql_query('SELECT invoice_no Rechnung, invoice_date Tarih, supplier Tedarikçi FROM invoices ORDER BY invoice_date',db),use_container_width=True,hide_index=True)
-    st.markdown('#### Alışlar'); st.dataframe(pd.read_sql_query('SELECT invoice_no Rechnung, product Ürün, qty Miktar, unit Birim FROM purchases',db),use_container_width=True,hide_index=True)
-    st.markdown('#### Satışlar'); st.dataframe(pd.read_sql_query('SELECT sale_date Tarih, product Ürün, qty Miktar FROM sales',db),use_container_width=True,hide_index=True)
-
+    st.subheader('Faturalar'); st.dataframe(pd.read_sql_query('SELECT invoice_no Rechnung, invoice_date Tarih, supplier Tedarikçi FROM invoices ORDER BY invoice_date',db),use_container_width=True,hide_index=True)
+    st.subheader('Alışlar'); st.dataframe(pd.read_sql_query('SELECT invoice_no Rechnung, product Ürün, qty Miktar, unit Birim FROM purchases',db),use_container_width=True,hide_index=True)
+    st.subheader('Satışlar'); st.dataframe(pd.read_sql_query('SELECT sale_date Tarih, product Ürün, qty Miktar FROM sales',db),use_container_width=True,hide_index=True)
 elif nav=='⚙️ Aktar':
-    st.markdown("<div class='hero'><div class='hero-kicker'>İLK KURULUM</div><h2>Eski verileri aktar</h2><p>Sohbette hesaplanan eski kayıtları tek seferde ekle.</p></div>",unsafe_allow_html=True)
-    done=db.execute("SELECT value FROM settings WHERE key='existing_import_v1'").fetchone()
-    if done: st.success('Eski veriler zaten aktarıldı. İkinci kez eklenmez.')
-    elif st.button('Eski Verilerimi Aktar',type='primary'):
+    st.subheader('Eski Verileri Aktar'); done=db.execute("SELECT value FROM settings WHERE key='existing_import_v1'").fetchone()
+    if done: st.success('Eski veriler zaten aktarıldı.')
+    elif st.button('Eski verilerimi şimdi aktar',type='primary'):
         if import_existing(db): st.success('Tamamlandı.'); st.rerun()
-
+    st.info('Yeni yüklediğin 11 Botan faturası otomatik eklendi. Aynı Rechnung numarası ikinci kez sayılmaz.')
 db.close()
