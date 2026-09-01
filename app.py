@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import sqlite3, re, io
+import sqlite3, re, io, hmac
 from datetime import date, datetime, timedelta
 import pandas as pd
 from pypdf import PdfReader
@@ -107,15 +107,46 @@ components.html("""
   const d = window.parent.document; const head = d.head;
   function meta(name, content){ let m=head.querySelector('meta[name="'+name+'"]'); if(!m){m=d.createElement('meta');m.name=name;head.appendChild(m);} m.content=content; }
   meta('apple-mobile-web-app-capable','yes'); meta('apple-mobile-web-app-status-bar-style','black-translucent');
-  meta('apple-mobile-web-app-title','Döner Stok'); meta('mobile-web-app-capable','yes'); meta('theme-color','#111111');
+  meta('apple-mobile-web-app-title','Döner Stok'); meta('mobile-web-app-capable','yes'); meta('theme-color','#080808');
   let manifest=head.querySelector('link[rel="manifest"]'); if(!manifest){manifest=d.createElement('link');manifest.rel='manifest';head.appendChild(manifest);} manifest.href='/app/static/manifest.json';
   d.title='Berlin Döner Stok';
 })();
 </script>
 """, height=0)
 
+try:
+    APP_PIN = str(st.secrets["APP_PIN"])
+except Exception:
+    st.error("🔒 PIN güvenli ayarlarda henüz tanımlanmadı.")
+    st.info("Streamlit uygulama ayarlarında Secrets bölümüne APP_PIN değerini ekle.")
+    st.stop()
+
+if "pin_ok" not in st.session_state:
+    st.session_state.pin_ok=False
+if not st.session_state.pin_ok:
+    st.markdown("<div style='text-align:center;font-size:56px'>🥙</div>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center;color:#E10600'>BERLIN DÖNER</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align:center'>STOK TAKİP</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center'>4 haneli PIN kodunu gir</p>", unsafe_allow_html=True)
+    left,mid,right=st.columns([1,2,1])
+    with mid:
+        pin=st.text_input("PIN",type="password",max_chars=4,placeholder="••••",label_visibility="collapsed")
+        if st.button("🔐 Giriş Yap",type="primary",use_container_width=True):
+            if hmac.compare_digest(pin,APP_PIN):
+                st.session_state.pin_ok=True
+                st.rerun()
+            else:
+                st.error("PIN yanlış.")
+    st.stop()
+
 db=con(); st.title("🥙 Berlin Döner – Stok Programı")
-st.caption("📱 Safari/Chrome → Paylaş → Ana Ekrana Ekle")
+col1,col2=st.columns([5,1])
+with col1: st.caption("📱 Safari/Chrome → Paylaş → Ana Ekrana Ekle")
+with col2:
+    if st.button("Çıkış"):
+        st.session_state.pin_ok=False
+        st.rerun()
+
 tabs=st.tabs(["📊 Ana Sayfa","⬇️ Eski Verileri Aktar","📄 Fatura Yükle","🧾 Satış Gir","📅 Eksik Haftalar","🗃️ Veriler"])
 
 with tabs[0]:
@@ -125,28 +156,21 @@ with tabs[0]:
         st.info("Henüz veri yok. 'Eski Verileri Aktar' bölümüne gir.")
     else:
         st.subheader("📦 Toplam Alınan Malzemeler")
-        if p.empty:
-            st.write("Henüz alış kaydı yok.")
+        if p.empty: st.write("Henüz alış kaydı yok.")
         else:
             for _,r in p.iterrows():
                 q=int(r['qty']) if float(r['qty']).is_integer() else round(float(r['qty']),2)
                 st.write(f"**{r['product']}** — {q} {r['unit'] or ''}")
-
-        st.divider()
-        st.subheader("🧾 Toplam Satılanlar")
-        if s.empty:
-            st.write("Henüz satış kaydı yok.")
+        st.divider(); st.subheader("🧾 Toplam Satılanlar")
+        if s.empty: st.write("Henüz satış kaydı yok.")
         else:
             for _,r in s.iterrows():
                 q=int(r['qty']) if float(r['qty']).is_integer() else round(float(r['qty']),2)
                 st.write(f"**{r['product']}** — {q} adet")
-
-        st.divider()
-        st.subheader("⚖️ Alınan / Satılan / Fark")
+        st.divider(); st.subheader("⚖️ Alınan / Satılan / Fark")
         pp=p[['product','qty']].rename(columns={'qty':'Alınan'}) if not p.empty else pd.DataFrame(columns=['product','Alınan'])
         ss=s[['product','qty']].rename(columns={'qty':'Satılan'}) if not s.empty else pd.DataFrame(columns=['product','Satılan'])
-        d=pd.merge(pp,ss,on='product',how='outer').fillna(0)
-        d['Fark']=d['Alınan']-d['Satılan']; d=d.rename(columns={'product':'Ürün'})
+        d=pd.merge(pp,ss,on='product',how='outer').fillna(0); d['Fark']=d['Alınan']-d['Satılan']; d=d.rename(columns={'product':'Ürün'})
         st.dataframe(d,use_container_width=True,hide_index=True)
         st.caption("Fark + ise alış satıştan fazla; - ise POS satışı bilinen alıştan fazla.")
 
