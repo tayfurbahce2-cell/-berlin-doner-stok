@@ -5,6 +5,10 @@ headless = true
 [browser]
 gatherUsageStats = false
 
+[client]
+toolbarMode = "viewer"
+showErrorDetails = false
+
 [theme]
 base = "dark"
 primaryColor = "#E10600"
